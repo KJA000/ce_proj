@@ -1,31 +1,39 @@
-from django.http import JsonResponse, HttpResponse
+from django.http import JsonResponse
 import requests
-import time
+import json
 
-def hugging_face_api_request(question, context):
-    HUGGING_FACE_API_URL = "https://api-inference.huggingface.co/models/wogkr810/mnm"
-    HUGGING_FACE_API_KEY = "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"
-    headers = {"Authorization": f"Bearer {HUGGING_FACE_API_KEY}"}
+from django.views.decorators.csrf import csrf_exempt
 
-    payload = {
-        "inputs": {
-                "question": "혁승이형 학교는 어디야?",
-                "context": "이혁승은 경희대학교 인공지능학과 22학번이다."
-        }
-    }
-
-    print("Payload:", payload)
-    
-    response = requests.post(HUGGING_FACE_API_URL, headers=headers, json=payload)
-    return response.json()
-
-
-
+@csrf_exempt
 def chatbot_view(request):
-    question = request.POST.get('question')
-    context = request.POST.get('context')
+    if request.method == 'POST':
+        try:
+            question = request.POST.get('question')
+            context = request.POST.get('context')
 
-    api_response = hugging_face_api_request(question, context)
+            HUGGING_FACE_API_URL = "https://api-inference.huggingface.co/models/ainize/klue-bert-base-mrc"
+            HUGGING_FACE_API_KEY = "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"
+            headers = {
+                "Authorization": f"Bearer {HUGGING_FACE_API_KEY}",
+                "Content-Type": "application/json",
+                "Accept": "application/json",
+            }
 
-    return JsonResponse(api_response)
+            payload = {
+                "inputs": {
+                    "question": question,
+                    "context": context
+                }
+            }
 
+            response = requests.post(HUGGING_FACE_API_URL, headers=headers, json=payload)
+            result = response.json()
+
+            return JsonResponse(result)
+
+        except json.JSONDecodeError as e:
+            return JsonResponse({"error": f"Invalid JSON format in the request body: {str(e)}"}, status=400)
+        except requests.RequestException as e:
+            return JsonResponse({"error": f"Error in making the request to Hugging Face API: {str(e)}"}, status=500)
+
+    return JsonResponse({"error": "Invalid request method"}, status=400)
