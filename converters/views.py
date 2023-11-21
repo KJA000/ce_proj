@@ -25,8 +25,9 @@ def upload_and_combine(request):
 
             os.remove(temp_file_path)
 
-        create_document_and_store_text(combined_text)
-        return JsonResponse({'message': 'Files uploaded and combined successfully', 'combined_text': combined_text})
+        doc_id = create_document_and_store_text(combined_text)
+        
+        return JsonResponse({'message': 'Files uploaded and combined successfully', 'doc_id':doc_id, 'combined_text': combined_text})
 
 @csrf_exempt
 def create_document_and_store_text(combined_text):
@@ -35,4 +36,4 @@ def create_document_and_store_text(combined_text):
     document.converted = True
     document.save()
 
-    return JsonResponse({'message': 'Document created and combined text stored successfully'})
+    return document.id
