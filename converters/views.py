@@ -15,7 +15,7 @@ def upload_document(request):
             document.save()
             text = textract.process(document.file.path).decode('utf-8')
             combined_text += text + " "
-            document.converted_text = text
+            document.converted_text = combined_text
             document.converted = True
             document.save()
 
