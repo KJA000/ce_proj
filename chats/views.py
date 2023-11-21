@@ -1,8 +1,6 @@
 from django.http import JsonResponse
 import requests
 import json
-from django.http import JsonResponse
-from django.views.decorators.csrf import csrf_exempt
 from converters.models import Document
 from django.views.decorators.csrf import csrf_exempt
 
@@ -29,7 +27,7 @@ def chatbot_view(request, document_id):
                     "context": context
                 }
             }
-            print(context)
+
             response = requests.post(HUGGING_FACE_API_URL, headers=headers, json=payload)
             result = response.json()
 
